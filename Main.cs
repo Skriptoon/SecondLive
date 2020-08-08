@@ -30,11 +30,11 @@ namespace SecondLive
         {
             MySQL.Set(config.DBServer, config.DBName, config.DBUid, config.DBPassword);
 
-            if (!MySQL.Test())
+            /*if (!MySQL.Test())
             {
                 Log.Write("Initialization has been aborted.", nLog.Type.Warn);
                 Environment.Exit(0);
-            }
+            }*/
         }
 
         [Command("creator")]
@@ -99,16 +99,16 @@ namespace SecondLive
             }
             else if(request == LoginEvent.Refused)
             {
-                GUI.Notify.Send(player, GUI.Notify.Type.Error, GUI.Notify.Position.BottomCenter, "Не верный логин или пароль", 2000);
+                Notify.Send(player, Notify.Type.Error, Notify.Position.BottomCenter, "Не верный логин или пароль", 5000);
                 //Trigger.ClientEvent(player, "client.login.response", 1);
             }
             else if (request == LoginEvent.SclubError)
             {
-                GUI.Notify.Send(player, Notify.Type.Error, Notify.Position.BottomCenter, "Аккаунт привязан к другому SocialClub", 2000);
+                Notify.Send(player, Notify.Type.Error, Notify.Position.BottomCenter, "Аккаунт привязан к другому SocialClub", 5000);
             }
             else
             {
-                GUI.Notify.Send(player, Notify.Type.Error, Notify.Position.BottomCenter, "Ошибка авторизации. Попробуйте позже", 2000);
+                Notify.Send(player, Notify.Type.Error, Notify.Position.BottomCenter, "Ошибка авторизации. Попробуйте позже", 5000);
             }
         }
 
@@ -149,23 +149,23 @@ namespace SecondLive
             }
             else if(request == RegisterEvent.DataError)
             {
-                Trigger.ClientEvent(player, "client.register.response", 1);
+                Notify.Send(player, Notify.Type.Error, Notify.Position.BottomCenter, "Заполните все поля", 5000);
             }
             else if (request == RegisterEvent.SocialReg)
             {
-                Trigger.ClientEvent(player, "client.register.response", 2);
+                Notify.Send(player, Notify.Type.Error, Notify.Position.BottomCenter, "Этот SocialClub уже заоеистрирован", 5000);
             }
             else if (request == RegisterEvent.UserReg)
             {
-                Trigger.ClientEvent(player, "client.register.response", 3);
+                Notify.Send(player, Notify.Type.Error, Notify.Position.BottomCenter, "Этот логин уже используется", 5000);
             }
             else if (request == RegisterEvent.EmailReg)
             {
-                Trigger.ClientEvent(player, "client.register.response", 4);
+                Notify.Send(player, Notify.Type.Error, Notify.Position.BottomCenter, "Эта почта уже используется", 5000);
             }
             else
             {
-                Trigger.ClientEvent(player, "client.register.response", 5);
+                Notify.Send(player, Notify.Type.Error, Notify.Position.BottomCenter, "Ошибка оегистрации. Попробуйте позже", 5000);
             }
         }
         [RemoteEvent("client.createCharacter")]

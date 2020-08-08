@@ -7,7 +7,7 @@ using System.Threading;
 using GTANetworkAPI;
 using Newtonsoft.Json;
 using SecondLive.Core.Logging;
-//using FivestarRevo.GUI;
+using SecondLive.GUI;
 using MySql.Data.MySqlClient;
 using Object = System.Object;
 using Timer = System.Threading.Timer;
@@ -963,7 +963,7 @@ namespace SecondLive.Core
         private static Timer SaveTimer;
 
         #region Constructor
-        [ServerEvent(Event.ResourceStart)]
+        /*[ServerEvent(Event.ResourceStart)]
         public void onResourceStart()
         {
             try
@@ -1001,7 +1001,7 @@ namespace SecondLive.Core
             {
                 Log.Write("EXCEPTION AT \"INVENTORY_CONSTRUCT\":\n" + e.ToString(), nLog.Type.Error);
             }
-        }
+        }*/
         #endregion
 
         #region Add/Remove item

@@ -1,0 +1,4 @@
+﻿<meta>
+  <info name="Login" description="login"/>
+  <script src="bin\Debug\netcoreapp3.1\SecondLive.dll"/>
+</meta>

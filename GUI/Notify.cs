@@ -29,7 +29,6 @@ namespace SecondLive.GUI
         public static void Send(Player client, Type type, Position pos, string msg, int time)
         {
             Trigger.ClientEvent(client, "notify", type, pos, msg, time);
-            //jkjhh
         }
     }
 }

@@ -99,16 +99,15 @@ namespace SecondLive
             }
             else if(request == LoginEvent.Refused)
             {
-                Notify.Send(player, Notify.Type.Error, Notify.Position.BottomCenter, "Не верный логин или пароль", 5000);
-                //Trigger.ClientEvent(player, "client.login.response", 1);
+                Notify.Send(player, "Не верный логин или пароль", Notify.Type.Error);
             }
             else if (request == LoginEvent.SclubError)
             {
-                Notify.Send(player, Notify.Type.Error, Notify.Position.BottomCenter, "Аккаунт привязан к другому SocialClub", 5000);
+                Notify.Send(player, "Аккаунт привязан к другому SocialClub", Notify.Type.Error);
             }
             else
             {
-                Notify.Send(player, Notify.Type.Error, Notify.Position.BottomCenter, "Ошибка авторизации. Попробуйте позже", 5000);
+                Notify.Send(player, "Ошибка авторизации. Попробуйте позже", Notify.Type.Error);
             }
         }
 
@@ -149,23 +148,23 @@ namespace SecondLive
             }
             else if(request == RegisterEvent.DataError)
             {
-                Notify.Send(player, Notify.Type.Error, Notify.Position.BottomCenter, "Заполните все поля", 5000);
+                Notify.Send(player, "Заполните все поля", Notify.Type.Error);
             }
             else if (request == RegisterEvent.SocialReg)
             {
-                Notify.Send(player, Notify.Type.Error, Notify.Position.BottomCenter, "Этот SocialClub уже заоеистрирован", 5000);
+                Notify.Send(player, "Этот SocialClub уже используется", Notify.Type.Error);
             }
             else if (request == RegisterEvent.UserReg)
             {
-                Notify.Send(player, Notify.Type.Error, Notify.Position.BottomCenter, "Этот логин уже используется", 5000);
+                Notify.Send(player, "Этот логин уже используется", Notify.Type.Error);
             }
             else if (request == RegisterEvent.EmailReg)
             {
-                Notify.Send(player, Notify.Type.Error, Notify.Position.BottomCenter, "Эта почта уже используется", 5000);
+                Notify.Send(player, "Эта почта уже используется", Notify.Type.Error);
             }
             else
             {
-                Notify.Send(player, Notify.Type.Error, Notify.Position.BottomCenter, "Ошибка оегистрации. Попробуйте позже", 5000);
+                Notify.Send(player, "Ошибка регистрации. Попробуйте позже");
             }
         }
         [RemoteEvent("client.createCharacter")]

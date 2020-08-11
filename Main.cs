@@ -37,11 +37,11 @@ namespace SecondLive
             }*/
         }
 
-        [Command("creator")]
+        /*[Command("creator")]
         public static void CMD_creator(Player player)
         {
             Customization.SendToCreator(player);
-        }
+        }*/
         [ServerEvent(Event.PlayerDisconnected)]
         public async Task OnPlayerDisconnectedAsync(Player player, DisconnectionType type, string reason)
         {

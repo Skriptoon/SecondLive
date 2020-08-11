@@ -974,6 +974,7 @@ namespace SecondLive.Core
                     SELECT * FROM `inventory`
                 ");
 
+
                 DataTable result = MySQL.QueryResult(queryCommand);
 
                 if (result == null)
@@ -2436,12 +2437,12 @@ namespace SecondLive.Core
             }
         }*/
 
-        /*public static string GetTimerKeyForAddiction(Client player)
+        /*public static string GetTimerKeyForAddiction(Player player)
         {
             return $"{Main.PlayerUUIDs[player.Name]}:AddictionEffect";
-        }
+        }*/
 
-        public static void StartAddictionEffect(Client player)
+        public static void StartAddictionEffect(Player player)
         {
             NAPI.Task.Run(() =>
             {
@@ -2449,7 +2450,7 @@ namespace SecondLive.Core
             });
         }
 
-        private static void HealPlayerBandage(Client player)
+        private static void HealPlayerBandage(Player player)
         {
             NAPI.Task.Run(() =>
             {
@@ -2457,10 +2458,10 @@ namespace SecondLive.Core
                 {
                     if (player.Health == 100)
                     {
-                        Timers.Stop(player.GetData("HEAL_BANDAGE_TIMER"));
+                        Timers.Stop(player.GetData<string>("HEAL_BANDAGE_TIMER"));
                         player.ResetData("HEAL_BANDAGE_TIMER");
                         
-                        GUI.Notify.Send(player, Notify.Type.Success, Notify.Position.BottomCenter, $"Вы закончили лечение бинтами", 3000);
+                        GUI.Notify.Send(player, $"Вы закончили лечение бинтами", Notify.Type.Success, Notify.Position.BottomCenter, 3000);
                         return;
                     }
                     player.Health = player.Health + 5 >= 100 ? 100 : player.Health + 5;
@@ -2470,7 +2471,7 @@ namespace SecondLive.Core
                     Log.Write($"Error in healing player with bandage. Ex: {ex.ToString()}", nLog.Type.Error);
                 }
             });
-        }*/
+        }
 
         private static void HealPlayerMiniMedkit(Player player)
         {
@@ -2503,38 +2504,38 @@ namespace SecondLive.Core
             new Tuple<int, int>(3, 2),
         };
         //
-        /*public static void onDrop(Client player, nItem item, dynamic data)
+        public static void onDrop(Player player, nItem item, dynamic data)
         {
             try
             {
-                if (item.Type == ItemType.KeyRing)
+                /*if (item.Type == ItemType.KeyRing)
                 {
                     Trigger.ClientEvent(player, "board", "close");
                     GUI.Dashboard.isopen[player] = false;
                     GUI.Dashboard.Close(player);
-                }
+                }*/
 
                 if (item.Type == ItemType.GasCan)
                 {
-                    GUI.Notify.Send(player, GUI.Notify.Type.Error, GUI.Notify.Position.BottomCenter, $"Невозможно выбросить канистру", 3000);
+                    GUI.Notify.Send(player, $"Невозможно выбросить канистру", Notify.Type.Error, Notify.Position.BottomCenter, 3000);
                     return;
                 }
 
                 if (item.Type == ItemType.HealthKit)
                 {
-                    GUI.Notify.Send(player, GUI.Notify.Type.Error, GUI.Notify.Position.BottomCenter, $"Невозможно выбросить аптечку", 3000);
+                    GUI.Notify.Send(player, $"Невозможно выбросить аптечку", Notify.Type.Error, Notify.Position.BottomCenter, 3000);
                     return;
                 }
 
                 if (item.Type == ItemType.Toksikanol)
                 {
-                    GUI.Notify.Send(player, GUI.Notify.Type.Error, GUI.Notify.Position.BottomCenter, $"Невозможно выбросить токсиканол", 3000);
+                    GUI.Notify.Send(player, $"Невозможно выбросить токсиканол", Notify.Type.Error, Notify.Position.BottomCenter, 3000);
                     return;
                 }
 
                 var rnd = new Random();
-                if (data != null && (int)data != 1)
-                    Commands.RPChat("me", player, $"выбросил(а) {nInventory.ItemsNames[(int)item.Type]}");
+                /*if (data != null && (int)data != 1)
+                    Commands.RPChat("me", player, $"выбросил(а) {nInventory.ItemsNames[(int)item.Type]}");*/
 
                 GameLog.Items($"player({GameLog.PlayerFormat(player)})", "ground", Convert.ToInt32(item.Type), 1, $"{item.Data}");
 
@@ -2543,8 +2544,8 @@ namespace SecondLive.Core
                     foreach (var o in NAPI.Pools.GetAllObjects())
                     {
                         if (player.Position.DistanceTo(o.Position) > 2) continue;
-                        if (!o.HasSharedData("TYPE") || o.GetSharedData("TYPE") != "DROPPED" || !o.HasData("ITEM")) continue;
-                        nItem oItem = o.GetData("ITEM");
+                        if (!o.HasSharedData("TYPE") || o.GetSharedData<string>("TYPE") != "DROPPED" || !o.HasData("ITEM")) continue;
+                        nItem oItem = o.GetData<nItem>("ITEM");
                         if (oItem.Type == item.Type)
                         {
                             oItem.Count += item.Count;
@@ -2570,10 +2571,22 @@ namespace SecondLive.Core
                 obj.SetData("DELETETIMER", Timers.StartOnce(14400000, () => deleteObject(obj)));
             }
             catch (Exception e) { Log.Write("onDrop: " + e.Message, nLog.Type.Error); }
-        }*/
+        }
         public static void onTransfer(Player player, nItem item, dynamic data)
         {
             //
+        }
+        public static void Update(Player client, nItem item, int index)
+        {
+            List<object> idata = new List<object>
+                    {
+                        item.ID,
+                        item.Count,
+                        (item.IsActive) ? 1 : 0,
+                        (nInventory.WeaponsItems.Contains(item.Type) || item.Type == ItemType.StunGun) ? "Serial: " + item.Data : (item.Type == ItemType.CarKey) ? $"{(string)item.Data.Split('_')[0]}" : ""
+                    };
+            string json = JsonConvert.SerializeObject(idata);
+            Trigger.ClientEvent(client, "board", 6, json, index);
         }
     }
     class nItem

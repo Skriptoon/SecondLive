@@ -5,7 +5,7 @@ using GTANetworkAPI;
 
 public class GlobalCollections {
 
-   /* public static List<string> LicWords = new List<string>()
+    public static List<string> LicWords = new List<string>()
     {
         "A",
         "B",
@@ -16,7 +16,7 @@ public class GlobalCollections {
         "G",
         "MED",
         "ARMY",
-    };*/
+    };
 
     public static List<Vector3> RandomSpawns = new List<Vector3>()
     {

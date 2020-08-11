@@ -98,8 +98,8 @@ namespace SecondLive.Core.Character
                             {
                                 GameLog.Explote(GameLog.PlayerFormat(player), $"Duplicate connect for ({GameLog.PlayerFormat(tmp)})");
 
-                                GUI.Notify.Send(tmp, Notify.Type.Alert, Notify.Position.BottomCenter, $"Кто-то пытался получить доступ к персонажу! Сообщите администрации!", 5000);
-                                GUI.Notify.Send(player, Notify.Type.Error, Notify.Position.BottomCenter, $"Вы не можете сейчас подключиться, попробуйте позже!", 5000);
+                                GUI.Notify.Send(tmp, $"Кто-то пытался получить доступ к персонажу! Сообщите администрации!", Notify.Type.Alert, Notify.Position.BottomCenter, 5000);
+                                GUI.Notify.Send(player, $"Вы не можете сейчас подключиться, попробуйте позже!", Notify.Type.Error, Notify.Position.BottomCenter, 5000);
                                 
                                 player.Kick("!");
                                 tmp.Kick("!");

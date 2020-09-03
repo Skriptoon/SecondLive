@@ -42,6 +42,14 @@ namespace SecondLive
         {
             Customization.SendToCreator(player);
         }*/
+
+        [Command("add_item")]
+        public static void CMD_add_item(Player player, int type)
+        {
+            var item = new nItem(ItemType.MicroSMG);
+            nInventory.Add(player, item);
+        }
+
         [ServerEvent(Event.PlayerDisconnected)]
         public async Task OnPlayerDisconnectedAsync(Player player, DisconnectionType type, string reason)
         {

@@ -1011,6 +1011,8 @@ namespace SecondLive.Core
             try
             {
                 int UUID = Main.Players[player].UUID;
+                Trigger.ClientEvent(player, "add_item", JsonConvert.SerializeObject(item));
+                /*int UUID = Main.Players[player].UUID;
                 int index = FindIndex(UUID, item.Type);
                 if (ClothesItems.Contains(item.Type) || WeaponsItems.Contains(item.Type) || item.Type == ItemType.CarKey || item.Type == ItemType.KeyRing)
                 {
@@ -1034,7 +1036,7 @@ namespace SecondLive.Core
                         //GUI.Dashboard.Update(player, item, Items[UUID].IndexOf(item));
                     }
                 }
-                Log.Debug($"Item added. {UUID.ToString()}:{index.ToString()}");
+                Log.Debug($"Item added. {UUID.ToString()}:{index.ToString()}");*/
             }
             catch (Exception e)
             {

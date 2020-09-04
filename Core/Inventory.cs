@@ -156,6 +156,7 @@ namespace SecondLive.Core
         ShotgunsAmmo = 204,
         DrugSeed = 230,
     }
+
     class nInventory : Script
     {
         public static Dictionary<int, string> ItemsNames = new Dictionary<int, string>
@@ -428,6 +429,12 @@ namespace SecondLive.Core
             { ItemType.SniperAmmo, NAPI.Util.GetHashKey("w_am_case") },
 
             { ItemType.DrugSeed, NAPI.Util.GetHashKey("bkr_prop_weed_dry_02b")},
+        };
+
+        public static Dictionary<ItemType, nItemSize> ItemsSize = new Dictionary<ItemType, nItemSize>()
+        {
+            {ItemType.Top, new nItemSize(2, 2)},
+            {ItemType.Leg, new nItemSize(2, 3)},
         };
 
         public static Dictionary<ItemType, Vector3> ItemsPosOffset = new Dictionary<ItemType, Vector3>()
@@ -957,10 +964,24 @@ namespace SecondLive.Core
             ItemType.ArmDrink2,
             ItemType.ArmDrink3,
         };
+
+        public static List<List<ItemType>> TypeItems = new List<List<ItemType>>()
+        {
+            ClothesItems,
+            WeaponsItems,
+            MeleeWeaponsItems,
+            AmmoItems,
+            AlcoItems
+        };
+
         // UUID, Items by index
         public static Dictionary<int, List<nItem>> Items = new Dictionary<int, List<nItem>>();
         private static nLog Log = new nLog("nInventory");
         private static Timer SaveTimer;
+
+        private static int Size_X = 5;
+        private static int Size_Y = 10;
+        private static Dictionary<int, List<bool>> Cells = new Dictionary<int, List<bool>>();
 
         #region Constructor
         /*[ServerEvent(Event.ResourceStart)]
@@ -1043,7 +1064,7 @@ namespace SecondLive.Core
                 Log.Write("EXCEPTION AT \"INVENTORY_ADD\":\n" + e.ToString(), nLog.Type.Error);
             }
         }
-        public static int TryAdd(Player client, nItem item)
+        /*public static int TryAdd(Player client, nItem item)
         {
             try
             {
@@ -1066,7 +1087,7 @@ namespace SecondLive.Core
                     /*var ammoType = Weapons.WeaponsAmmoTypes[item.Type];
                     var sameTypeWeapon = Items[UUID].FirstOrDefault(i => WeaponsItems.Contains(i.Type) && Weapons.WeaponsAmmoTypes[i.Type] == ammoType);
                     if (sameTypeWeapon != null)*/
-                        return -1;
+                        /*return -1;
                 }
                 else if (MeleeWeaponsItems.Contains(item.Type))
                 {
@@ -1108,7 +1129,7 @@ namespace SecondLive.Core
                 Log.Write("EXCEPTION AT \"INVENTORY_ADD\":\n" + e.ToString(), nLog.Type.Error);
                 return 0;
             }
-        }
+        }*/
         public static void Remove(Player player, ItemType type, int count)
         {
             try
@@ -1182,7 +1203,21 @@ namespace SecondLive.Core
         }
         #endregion
 
-        #region Save items to db
+        #region Save/Load items
+        public static void Load(Player player)
+        {
+            List<bool> active = new List<bool>();
+
+            for (int i = 0; i < Size_X * Size_Y; i++)
+            {
+                active.Add(false);
+            }
+
+            int UUID = Main.Players[player].UUID;
+            Cells.Add(UUID, active);
+
+            Items.Add(UUID, new List<nItem>());
+        }
         public static void SaveAll(object state = null)
         {
             try
@@ -1256,13 +1291,15 @@ namespace SecondLive.Core
         #endregion
 
         #region SPECIAL
-        public static void GiveStarterItems(Player player)
+        
+        //public static void GetFreeCell()
+        /*public static void GiveStarterItems(Player player)
         {
             nInventory.Add(player, new nItem(ItemType.Burger));
             nInventory.Add(player, new nItem(ItemType.Burger));
             nInventory.Add(player, new nItem(ItemType.Pizza));
-
-        }
+        
+        }*/
         public static nItem Find(int UUID, ItemType type)
         {
             List<nItem> items = Items[UUID];
@@ -1276,11 +1313,10 @@ namespace SecondLive.Core
             return result;
         }
 
-        public static bool isFull(int UUID)
+        /*public static bool isFull(int UUID)
         {
-            if (Items[UUID].Count >= 20) return true;
-            else return false;
-        }
+            
+        }*/
 
         public static void Check(int uuid)
         {
@@ -1358,6 +1394,33 @@ namespace SecondLive.Core
             {
                 Log.Write(e.ToString(), nLog.Type.Error);
             }
+        }
+        public static ItemType GetType(int id)
+        {
+            for(int i = 0; i < TypeItems.Count; i++)
+            {
+                for(int k = 0; k < TypeItems[i].Count; k++)
+                {
+                    if(Convert.ToInt32(TypeItems[i][k]) == id)
+                    {
+                        return TypeItems[i][k];
+                    }
+                }
+            }
+            return ItemType.Debug;
+        }
+        #endregion
+
+        #region Events
+        [RemoteEvent("server.inventory.update")]
+        public static void Update(Player player, params object[] args)
+        {
+            int UUID = Main.Players[player].UUID;
+
+            Items[UUID].Clear();
+            Items[UUID] = JsonConvert.DeserializeObject<List<nItem>>(Convert.ToString(args[0]));
+
+            NAPI.Util.ConsoleOutput(JsonConvert.SerializeObject(Items[UUID]));
         }
         #endregion
     }
@@ -2591,18 +2654,34 @@ namespace SecondLive.Core
             Trigger.ClientEvent(client, "board", 6, json, index);
         }
     }
+
+    class nItemSize
+    {
+        public int x;
+        public int y;
+
+        public nItemSize(int szx, int szy)
+        {
+            x = szx;
+            y = szy;
+        }
+    }
+
     class nItem
     {
         public int ID { get; internal set; }
+        public nItemSize Size { get; internal set; }
         public ItemType Type { get; internal set; }
+        public int Cell { get; set; }
         public int Count { get; set; }
         public bool IsActive { get; set; }
         public dynamic Data;
 
-        public nItem(ItemType type, int count = 1, dynamic data = null, bool isActive = false)
+        public nItem(int id, int cell, int count = 1, dynamic data = null, bool isActive = false)
         {
-            ID = Convert.ToInt32(type);
-            Type = type;
+            ID = id;
+            Size = nInventory.ItemsSize[nInventory.GetType(id)];
+            Cell = cell;
             Count = count;
             Data = data;
             IsActive = isActive;

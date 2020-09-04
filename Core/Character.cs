@@ -242,6 +242,8 @@ namespace SecondLive.Core.Character
 
                 ResponseData.Add("warn", warnData);
 
+                nInventory.Load(player);
+
                 /*if (!Dashboard.isopen.ContainsKey(player)) {
                     // TODO: maybe need remove it?)
                     Dashboard.isopen.Add(player, false);

@@ -2425,14 +2425,15 @@ namespace SecondLive.Core
             }
         }
 
-        /*public static void AddClothes(Player player, ItemType type, int variation, int texture, bool isActive = false)
+        public static void AddClothes(Player player, ItemType type, int variation, int texture, bool isActive = false)
         {
             if (!Main.Players.ContainsKey(player)) return;
             if (!nInventory.Items.ContainsKey(Main.Players[player].UUID)) return;
+            int cell = nInventory.GetFreeCell(Main.Players[player].UUID, type);
 
-            var item = new nItem(type, 1, $"{variation}_{texture}_{Main.Players[player].Gender}", isActive);
+            var item = new nItem(Convert.ToInt32(type), cell, 1, $"{variation}_{texture}_{Main.Players[player].Gender}", isActive);
             nInventory.Add(player, item);
-        }*/
+        }
 
             public static void SetMask(Player player, int variation, int texture)
         {
@@ -2635,17 +2636,17 @@ namespace SecondLive.Core
 
                 if (genderChanged)
                 {
-                    /*if (isChanging){
+                    if (isChanging){
                         nInventory.ClearAllClothes(player);
                     } else {
-                        nInventory.GiveStarterItems(player);
-                    }*/
+                        //nInventory.GiveStarterItems(player);
+                    }
 
                     switch (Main.Players[player].Gender)
                     {
                         case true:
-                            /*AddClothes(player, ItemType.Undershit, 1, 1, true);
-                            AddClothes(player, ItemType.Leg, 0, 1, true);
+                            AddClothes(player, ItemType.Undershit, 1, 1, true);
+                            /*AddClothes(player, ItemType.Leg, 0, 1, true);
                             AddClothes(player, ItemType.Feet, 1, 1, true);*/
 
                             CustomPlayerData[Main.Players[player].UUID].Clothes.Top = new ComponentItem(1, 1);
@@ -2653,8 +2654,8 @@ namespace SecondLive.Core
                             CustomPlayerData[Main.Players[player].UUID].Clothes.Feet = new ComponentItem(1, 1);
                             break;
                         case false:
-                            /*AddClothes(player, ItemType.Undershit, 1, 1, true);
-                            AddClothes(player, ItemType.Leg, 0, 1, true);
+                            AddClothes(player, ItemType.Undershit, 1, 1, true);
+                            /*AddClothes(player, ItemType.Leg, 0, 1, true);
                             AddClothes(player, ItemType.Feet, 3, 1, true);*/
 
                             CustomPlayerData[Main.Players[player].UUID].Clothes.Top = new ComponentItem(5, 1);

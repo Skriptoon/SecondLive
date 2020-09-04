@@ -46,8 +46,7 @@ namespace SecondLive
         [Command("add_item")]
         public static void CMD_add_item(Player player, int type)
         {
-            var item = new nItem(type, 0);
-            nInventory.Add(player, item);
+            nInventory.Add(player, type);
         }
 
         [ServerEvent(Event.PlayerDisconnected)]

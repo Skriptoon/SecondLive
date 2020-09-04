@@ -433,8 +433,9 @@ namespace SecondLive.Core
 
         public static Dictionary<ItemType, nItemSize> ItemsSize = new Dictionary<ItemType, nItemSize>()
         {
-            {ItemType.Top, new nItemSize(2, 2)},
-            {ItemType.Leg, new nItemSize(2, 3)},
+            { ItemType.Leg, new nItemSize(2, 3)},
+            { ItemType.Undershit, new nItemSize(2,2) },
+            { ItemType.Top, new nItemSize(2, 2)}
         };
 
         public static Dictionary<ItemType, Vector3> ItemsPosOffset = new Dictionary<ItemType, Vector3>()
@@ -1027,12 +1028,22 @@ namespace SecondLive.Core
         #endregion
 
         #region Add/Remove item
-        public static void Add(Player player, nItem item)
+        public static bool Add(Player player, int item)
         {
             try
             {
                 int UUID = Main.Players[player].UUID;
-                Trigger.ClientEvent(player, "add_item", JsonConvert.SerializeObject(item));
+                ItemType type = GetType(item);
+                int cell = GetFreeCell(UUID, type);
+                nItem szItem;
+                if (cell != -1)
+                {
+                    szItem = new nItem(item, cell);
+                    Trigger.ClientEvent(player, "client.additem", JsonConvert.SerializeObject(szItem));
+                    return true;
+                }
+                return false;
+                
                 /*int UUID = Main.Players[player].UUID;
                 int index = FindIndex(UUID, item.Type);
                 if (ClothesItems.Contains(item.Type) || WeaponsItems.Contains(item.Type) || item.Type == ItemType.CarKey || item.Type == ItemType.KeyRing)
@@ -1062,6 +1073,22 @@ namespace SecondLive.Core
             catch (Exception e)
             {
                 Log.Write("EXCEPTION AT \"INVENTORY_ADD\":\n" + e.ToString(), nLog.Type.Error);
+                return false;
+            }
+        }
+        public static bool Add(Player player, nItem item)
+        {
+            try
+            {
+                int UUID = Main.Players[player].UUID;
+                Trigger.ClientEvent(player, "client.additem", JsonConvert.SerializeObject(item));
+                Log.Debug($"Item added. {UUID.ToString()}");
+                return true;
+            }
+            catch (Exception e)
+            {
+                Log.Write("EXCEPTION AT \"INVENTORY_ADD\":\n" + e.ToString(), nLog.Type.Error);
+                return false;
             }
         }
         /*public static int TryAdd(Player client, nItem item)
@@ -1087,49 +1114,49 @@ namespace SecondLive.Core
                     /*var ammoType = Weapons.WeaponsAmmoTypes[item.Type];
                     var sameTypeWeapon = Items[UUID].FirstOrDefault(i => WeaponsItems.Contains(i.Type) && Weapons.WeaponsAmmoTypes[i.Type] == ammoType);
                     if (sameTypeWeapon != null)*/
-                        /*return -1;
-                }
-                else if (MeleeWeaponsItems.Contains(item.Type))
-                {
-                    if (isFull(UUID))
-                        return -1;
+        /*return -1;
+}
+else if (MeleeWeaponsItems.Contains(item.Type))
+{
+    if (isFull(UUID))
+        return -1;
 
-                    var sameWeapon = Items[UUID].FirstOrDefault(i => i.Type == item.Type);
-                    if (sameWeapon != null)
-                        return -1;
-                }
-                else
-                {
-                    if (index != -1)
-                    {
-                        int max = (ItemsStacks.ContainsKey(item.Type)) ? ItemsStacks[item.Type] : 1;
-                        int count = Items[UUID][index].Count;
-                        int temp = count + item.Count;
-                        if (temp > max)
-                        {
-                            tail = temp - max;
-                            return tail;
-                        }
-                    }
-                    else
-                    {
-                        if (item.Count > ItemsStacks[item.Type])
-                        {
-                            tail = item.Count - ItemsStacks[item.Type];
-                            return tail;
-                        }
-                        else if (isFull(UUID))
-                            return -1;
-                    }
-                }
-                return tail;
-            }
-            catch (Exception e)
-            {
-                Log.Write("EXCEPTION AT \"INVENTORY_ADD\":\n" + e.ToString(), nLog.Type.Error);
-                return 0;
-            }
-        }*/
+    var sameWeapon = Items[UUID].FirstOrDefault(i => i.Type == item.Type);
+    if (sameWeapon != null)
+        return -1;
+}
+else
+{
+    if (index != -1)
+    {
+        int max = (ItemsStacks.ContainsKey(item.Type)) ? ItemsStacks[item.Type] : 1;
+        int count = Items[UUID][index].Count;
+        int temp = count + item.Count;
+        if (temp > max)
+        {
+            tail = temp - max;
+            return tail;
+        }
+    }
+    else
+    {
+        if (item.Count > ItemsStacks[item.Type])
+        {
+            tail = item.Count - ItemsStacks[item.Type];
+            return tail;
+        }
+        else if (isFull(UUID))
+            return -1;
+    }
+}
+return tail;
+}
+catch (Exception e)
+{
+Log.Write("EXCEPTION AT \"INVENTORY_ADD\":\n" + e.ToString(), nLog.Type.Error);
+return 0;
+}
+}*/
         public static void Remove(Player player, ItemType type, int count)
         {
             try
@@ -1291,8 +1318,6 @@ namespace SecondLive.Core
         #endregion
 
         #region SPECIAL
-        
-        //public static void GetFreeCell()
         /*public static void GiveStarterItems(Player player)
         {
             nInventory.Add(player, new nItem(ItemType.Burger));
@@ -1313,10 +1338,32 @@ namespace SecondLive.Core
             return result;
         }
 
-        /*public static bool isFull(int UUID)
+        public static int GetFreeCell(int UUID, ItemType type)
         {
-            
-        }*/
+            bool free = false;
+            List<bool> cells = Cells[UUID];
+            for (var freecell = 0; freecell < Size_X * Size_Y; freecell++)
+            {
+                for (var i = 0; i < ItemsSize[type].x; i++)
+                {
+                    for (var k = 0; k < ItemsSize[type].y; k++)
+                    {
+                        free = false;
+                        if (freecell + i + k * Size_X > Size_X * Size_Y - 1) break;
+                        if (cells[freecell + i + k * Size_X])
+                            break;
+                        free = true;
+                    }
+                    if (!free)
+                        break;
+                }
+                if (ItemsSize[type].x + freecell % Size_X > Size_X || freecell + (ItemsSize[type].y - 1) * Size_X > Size_X * Size_Y)
+                    continue;
+                if (free)
+                    return freecell;
+            }
+            return -1;
+        }
 
         public static void Check(int uuid)
         {

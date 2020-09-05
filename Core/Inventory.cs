@@ -1091,72 +1091,6 @@ namespace SecondLive.Core
                 return false;
             }
         }
-        /*public static int TryAdd(Player client, nItem item)
-        {
-            try
-            {
-                int UUID = Main.Players[client].UUID;
-                int index = FindIndex(UUID, item.Type);
-                int tail = 0;
-                if (ClothesItems.Contains(item.Type) || item.Type == ItemType.CarKey || item.Type == ItemType.KeyRing)
-                {
-                    if (isFull(UUID))
-                        return -1;
-
-                    if (item.Type == ItemType.BodyArmor && index != -1)
-                        return -1;
-                }
-                else if (WeaponsItems.Contains(item.Type))
-                {
-                    if (isFull(UUID))
-                        return -1;
-
-                    /*var ammoType = Weapons.WeaponsAmmoTypes[item.Type];
-                    var sameTypeWeapon = Items[UUID].FirstOrDefault(i => WeaponsItems.Contains(i.Type) && Weapons.WeaponsAmmoTypes[i.Type] == ammoType);
-                    if (sameTypeWeapon != null)*/
-        /*return -1;
-}
-else if (MeleeWeaponsItems.Contains(item.Type))
-{
-    if (isFull(UUID))
-        return -1;
-
-    var sameWeapon = Items[UUID].FirstOrDefault(i => i.Type == item.Type);
-    if (sameWeapon != null)
-        return -1;
-}
-else
-{
-    if (index != -1)
-    {
-        int max = (ItemsStacks.ContainsKey(item.Type)) ? ItemsStacks[item.Type] : 1;
-        int count = Items[UUID][index].Count;
-        int temp = count + item.Count;
-        if (temp > max)
-        {
-            tail = temp - max;
-            return tail;
-        }
-    }
-    else
-    {
-        if (item.Count > ItemsStacks[item.Type])
-        {
-            tail = item.Count - ItemsStacks[item.Type];
-            return tail;
-        }
-        else if (isFull(UUID))
-            return -1;
-    }
-}
-return tail;
-}
-catch (Exception e)
-{
-Log.Write("EXCEPTION AT \"INVENTORY_ADD\":\n" + e.ToString(), nLog.Type.Error);
-return 0;
-}
-}*/
         public static void Remove(Player player, ItemType type, int count)
         {
             try
@@ -1467,7 +1401,8 @@ return 0;
             Items[UUID].Clear();
             Items[UUID] = JsonConvert.DeserializeObject<List<nItem>>(Convert.ToString(args[0]));
 
-            NAPI.Util.ConsoleOutput(JsonConvert.SerializeObject(Items[UUID]));
+            Cells[UUID].Clear();
+            Cells[UUID] = JsonConvert.DeserializeObject<List<bool>>(Convert.ToString(args[1]));
         }
         #endregion
     }

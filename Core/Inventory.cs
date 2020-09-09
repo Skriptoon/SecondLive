@@ -1509,8 +1509,8 @@ namespace SecondLive.Core
                     {
                         
                         var error_gender = (clothesGender) ? "мужская" : "женская";
-                        Notify.Send(player, $"Это {error_gender} одежда", GUI.Notify.Type.Error, GUI.Notify.Position.BottomCenter, 3000);
-                        //Dashboard.Close(player);
+                        Notify.Send(player, $"Это {error_gender} одежда", Notify.Type.Error, Notify.Position.BottomCenter, 3000);
+                        Trigger.ClientEvent(player, "server.item.use.respose", false);
                         return;
                     }
                     /*if ((player.GetData("ON_DUTY") && Fractions.Manager.FractionTypes[Main.Players[player].FractionID] == 2 && Main.Players[player].FractionID != 9) || player.GetData("ON_WORK"))
@@ -1764,12 +1764,10 @@ namespace SecondLive.Core
                         }*/
                     case ItemType.Leg:
                         {
-                            if (item.IsActive)
+                            if (item.Cell == -2)
                             {
                                 Customization.CustomPlayerData[UUID].Clothes.Leg = new ComponentItem(Customization.EmtptySlots[gender][4], 0);
-
-                                //nInventory.Items[UUID][index].IsActive = false;
-                                //GUI.Dashboard.Update(player, item, index);
+                                Trigger.ClientEvent(player, "server.item.use.respose", false);
                             }
                             else
                             {
@@ -1777,12 +1775,10 @@ namespace SecondLive.Core
                                 var variation = Convert.ToInt32(itemData.Split('_')[0]);
                                 var texture = Convert.ToInt32(itemData.Split('_')[1]);
                                 Customization.CustomPlayerData[UUID].Clothes.Leg = new ComponentItem(variation, texture);
-
-                                //nInventory.UnActiveItem(player, item.Type);
-                                //nInventory.Items[UUID][index].IsActive = true;
-                                //GUI.Dashboard.Update(player, item, index);
+                                Trigger.ClientEvent(player, "server.item.use.respose", true);
                             }
                             player.SetClothes(4, Customization.CustomPlayerData[UUID].Clothes.Leg.Variation, Customization.CustomPlayerData[UUID].Clothes.Leg.Texture);
+                            
                             return;
                         }
                     /*case ItemType.Bag:

@@ -1178,6 +1178,26 @@ namespace SecondLive.Core
             Cells.Add(UUID, active);
 
             Items.Add(UUID, new List<nItem>());
+
+            MySqlCommand querySelectCommand = new MySqlCommand(@"
+                    SELECT *
+                    FROM `inventory`
+                    WHERE
+                        `uuid` = @UUID
+                ");
+
+            querySelectCommand.Parameters.AddWithValue("@UUID", UUID);
+
+            DataTable result = MySQL.QueryResult(querySelectCommand);
+
+            DataRow row = result.Rows[0];
+
+            Items[UUID] = JsonConvert.DeserializeObject<List<nItem>>((string)row["items"]);
+
+            for (int i = 0; i < Items[UUID].Count; i++)
+            {
+                Trigger.ClientEvent(player, "client.additem", JsonConvert.SerializeObject(Items[UUID][i]));
+            }
         }
         public static void SaveAll(object state = null)
         {
@@ -1189,9 +1209,20 @@ namespace SecondLive.Core
                     return;
                 }
 
-                Dictionary<int, List<nItem>> cItems = new Dictionary<int, List<nItem>>(Items);
+                string cItems = JsonConvert.SerializeObject(Items);
 
-                foreach (KeyValuePair<int, List<nItem>> kvp in cItems)
+                /*MySqlCommand queryCommand = new MySqlCommand(@"
+                        UPDATE `inventory`
+                        SET
+                            `items` = @ITEMS
+                        WHERE
+                            `uuid` = @UUID
+                    ");
+
+                queryCommand.Parameters.AddWithValue("@ITEMS", cItems);
+                queryCommand.Parameters.AddWithValue("@UUID", UUID);*/
+
+                /*foreach (KeyValuePair<int, List<nItem>> kvp in cItems)
                 {
                     int UUID = kvp.Key;
                     string itemsJson = JsonConvert.SerializeObject(kvp.Value);
@@ -1208,7 +1239,7 @@ namespace SecondLive.Core
                     queryCommand.Parameters.AddWithValue("@UUID", UUID);
 
                     MySQL.Query(queryCommand);
-                }
+                }*/
 
                 Log.Write("Items has been saved to DB.", nLog.Type.Success);
             }
@@ -1241,6 +1272,9 @@ namespace SecondLive.Core
                 queryCommand.Parameters.AddWithValue("@UUID", UUID);
 
                 MySQL.Query(queryCommand);
+
+                Items.Remove(UUID);
+                Cells.Remove(UUID);
 
                 Log.Write("Items has been saved to DB.", nLog.Type.Success);
             }
@@ -1454,31 +1488,40 @@ namespace SecondLive.Core
             }, 0);
         }
 
-        /*public static void onUse(Player player, nItem item, int index)
+        [RemoteEvent("server.item.use")]
+        public static void ItemUse(Player player, string item)
+        {
+            nItem szItem = JsonConvert.DeserializeObject<nItem>(item);
+            onUse(player, szItem);
+        }
+
+        public static void onUse(Player player, nItem item)
         {
             try
             {
                 var UUID = Main.Players[player].UUID;
+                item.Type = nInventory.GetType(item.ID);
                 if (nInventory.ClothesItems.Contains(item.Type) && item.Type != ItemType.BodyArmor && item.Type != ItemType.Mask)
                 {
                     var data = (string)item.Data;
-                    var clothesGender = Convert.ToBoolean(data.Split('_')[2]);
+                    var clothesGender = Convert.ToBoolean(Convert.ToInt32(data.Split('_')[2]));
                     if (clothesGender != Main.Players[player].Gender)
                     {
+                        
                         var error_gender = (clothesGender) ? "мужская" : "женская";
-                        GUI.Notify.Send(player, GUI.Notify.Type.Error, GUI.Notify.Position.BottomCenter, $"Это {error_gender} одежда", 3000);
-                        GUI.Dashboard.Close(player);
+                        Notify.Send(player, $"Это {error_gender} одежда", GUI.Notify.Type.Error, GUI.Notify.Position.BottomCenter, 3000);
+                        //Dashboard.Close(player);
                         return;
                     }
-                    if ((player.GetData("ON_DUTY") && Fractions.Manager.FractionTypes[Main.Players[player].FractionID] == 2 && Main.Players[player].FractionID != 9) || player.GetData("ON_WORK"))
+                    /*if ((player.GetData("ON_DUTY") && Fractions.Manager.FractionTypes[Main.Players[player].FractionID] == 2 && Main.Players[player].FractionID != 9) || player.GetData("ON_WORK"))
                     {
-                        GUI.Notify.Send(player, GUI.Notify.Type.Error, GUI.Notify.Position.BottomCenter, "Вы не можете использовать это сейчас", 3000);
-                        GUI.Dashboard.Close(player);
+                        Notify.Send(player, "Вы не можете использовать это сейчас", GUI.Notify.Type.Error, GUI.Notify.Position.BottomCenter, 3000);
+                        //Dashboard.Close(player);
                         return;
-                    }
+                    }*/
                 }
 
-                if (nInventory.WeaponsItems.Contains(item.Type) || nInventory.MeleeWeaponsItems.Contains(item.Type))
+                /*if (nInventory.WeaponsItems.Contains(item.Type) || nInventory.MeleeWeaponsItems.Contains(item.Type))
                 {
                     if (item.IsActive)
                     {
@@ -1580,19 +1623,19 @@ namespace SecondLive.Core
 
                     Commands.RPChat("me", player, "выпил бутылку " + nInventory.ItemsNames[(int)item.Type]);
                     GameLog.Items($"player({UUID},{player.Name})", "use", Convert.ToInt32(item.Type), 1, $"{item.Data}");
-                }
+                }*/
 
                 var gender = Main.Players[player].Gender;
                 Log.Debug("item used");
 
-                Hunger HungerPlayer = new Hunger(Main.Players[player].HungerData.Value, Main.Players[player].HungerData.HungerTime);
+                //Hunger HungerPlayer = new Hunger(Main.Players[player].HungerData.Value, Main.Players[player].HungerData.HungerTime);
 
                 var isUsingItemSuccess = true;
 
                 switch (item.Type)
                 {
                     #region Clothes
-                    case ItemType.Glasses:
+                    /*case ItemType.Glasses:
                         {
                             if (item.IsActive)
                             {
@@ -1718,15 +1761,15 @@ namespace SecondLive.Core
                             }
                             player.SetClothes(3, Customization.CustomPlayerData[UUID].Clothes.Torso.Variation, Customization.CustomPlayerData[UUID].Clothes.Torso.Texture);
                             return;
-                        }
+                        }*/
                     case ItemType.Leg:
                         {
                             if (item.IsActive)
                             {
                                 Customization.CustomPlayerData[UUID].Clothes.Leg = new ComponentItem(Customization.EmtptySlots[gender][4], 0);
 
-                                nInventory.Items[UUID][index].IsActive = false;
-                                GUI.Dashboard.Update(player, item, index);
+                                //nInventory.Items[UUID][index].IsActive = false;
+                                //GUI.Dashboard.Update(player, item, index);
                             }
                             else
                             {
@@ -1735,14 +1778,14 @@ namespace SecondLive.Core
                                 var texture = Convert.ToInt32(itemData.Split('_')[1]);
                                 Customization.CustomPlayerData[UUID].Clothes.Leg = new ComponentItem(variation, texture);
 
-                                nInventory.UnActiveItem(player, item.Type);
-                                nInventory.Items[UUID][index].IsActive = true;
-                                GUI.Dashboard.Update(player, item, index);
+                                //nInventory.UnActiveItem(player, item.Type);
+                                //nInventory.Items[UUID][index].IsActive = true;
+                                //GUI.Dashboard.Update(player, item, index);
                             }
                             player.SetClothes(4, Customization.CustomPlayerData[UUID].Clothes.Leg.Variation, Customization.CustomPlayerData[UUID].Clothes.Leg.Texture);
                             return;
                         }
-                    case ItemType.Bag:
+                    /*case ItemType.Bag:
                         {
                             if (item.IsActive)
                             {
@@ -2081,9 +2124,9 @@ namespace SecondLive.Core
                             Customization.ApplyCorrectArmor(player);
                             Customization.ApplyCorrectTorso(player);
                             return;
-                        }
+                        }*/
                     #endregion
-                    case ItemType.BagWithDrill:
+                    /*case ItemType.BagWithDrill:
                     case ItemType.BagWithMoney:
                     case ItemType.Pocket:
                     case ItemType.Cuffs:
@@ -2466,23 +2509,23 @@ namespace SecondLive.Core
 
                         Commands.RPChat("me", player, $"открыл(а) подарок");
                         */
-                        /*break;
+                        //break;
                 }
 
                 if (isUsingItemSuccess)
                 {
                     nInventory.Remove(player, item.Type, 1);
-                    GUI.Notify.Send(player, GUI.Notify.Type.Info, GUI.Notify.Position.BottomCenter, $"Вы использовали {nInventory.ItemsNames[item.ID]}", 3000);
+                    Notify.Send(player, $"Вы использовали {nInventory.ItemsNames[item.ID]}", Notify.Type.Info, Notify.Position.BottomCenter, 3000);
                     GameLog.Items($"player({UUID},{player.Name})", "use", Convert.ToInt32(item.Type), 1, $"{item.Data}");
                 }
 
-                GUI.Dashboard.Close(player);
+                //GUI.Dashboard.Close(player);
             }
             catch (Exception e)
             {
-                Log.Write($"EXCEPTION AT\"ITEM_USE\"/{item.Type}/{index}/{player.Name}/:\n" + e.ToString(), nLog.Type.Error);
+                Log.Write($"EXCEPTION AT\"ITEM_USE\"/{item.Type}//{player.Name}/:\n" + e.ToString(), nLog.Type.Error);
             }
-        }*/
+        }
 
         /*public static string GetTimerKeyForAddiction(Player player)
         {
@@ -2663,6 +2706,7 @@ namespace SecondLive.Core
         {
             ID = id;
             Size = nInventory.ItemsSize[nInventory.GetType(id)];
+            Type = nInventory.GetType(id);
             Cell = cell;
             Count = count;
             Data = data;

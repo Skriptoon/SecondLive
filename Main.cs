@@ -61,7 +61,8 @@ namespace SecondLive
             {
                 await Accounts[player].Save();
             }
-
+            nInventory.Save(Players[player].UUID);
+                
             Customization.CustomPlayerData.Remove(Players[player].UUID);
             Accounts.Remove(player);
             Players.Remove(player);

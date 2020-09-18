@@ -433,9 +433,10 @@ namespace SecondLive.Core
 
         public static Dictionary<ItemType, nItemSize> ItemsSize = new Dictionary<ItemType, nItemSize>()
         {
-            { ItemType.Leg, new nItemSize(2, 3)},
+            { ItemType.Leg, new nItemSize(2, 3) },
             { ItemType.Undershit, new nItemSize(2,2) },
-            { ItemType.Top, new nItemSize(2, 2)}
+            { ItemType.Top, new nItemSize(2, 2) },
+             { ItemType.Feet, new nItemSize(2, 1)}
         };
 
         public static Dictionary<ItemType, Vector3> ItemsPosOffset = new Dictionary<ItemType, Vector3>()
@@ -1504,7 +1505,7 @@ namespace SecondLive.Core
                 if (nInventory.ClothesItems.Contains(item.Type) && item.Type != ItemType.BodyArmor && item.Type != ItemType.Mask)
                 {
                     var data = (string)item.Data;
-                    var clothesGender = Convert.ToBoolean(Convert.ToInt32(data.Split('_')[2]));
+                    var clothesGender = Convert.ToBoolean(data.Split('_')[2]);
                     if (clothesGender != Main.Players[player].Gender)
                     {
                         
@@ -1803,15 +1804,16 @@ namespace SecondLive.Core
                             }
                             player.SetClothes(5, Customization.CustomPlayerData[UUID].Clothes.Bag.Variation, Customization.CustomPlayerData[UUID].Clothes.Bag.Texture);
                             return;
-                        }
+                        }*/
                     case ItemType.Feet:
                         {
-                            if (item.IsActive)
+                            if (item.Cell == -2)
                             {
                                 Customization.CustomPlayerData[UUID].Clothes.Feet = new ComponentItem(Customization.EmtptySlots[gender][6], 0);
 
-                                nInventory.Items[UUID][index].IsActive = false;
-                                GUI.Dashboard.Update(player, item, index);
+                                /*nInventory.Items[UUID][index].IsActive = false;
+                                GUI.Dashboard.Update(player, item, index);*/
+                                Trigger.ClientEvent(player, "server.item.use.respose", false);
                             }
                             else
                             {
@@ -1820,14 +1822,15 @@ namespace SecondLive.Core
                                 var texture = Convert.ToInt32(itemData.Split('_')[1]);
                                 Customization.CustomPlayerData[UUID].Clothes.Feet = new ComponentItem(variation, texture);
 
-                                nInventory.UnActiveItem(player, item.Type);
+                                /*nInventory.UnActiveItem(player, item.Type);
                                 nInventory.Items[UUID][index].IsActive = true;
-                                GUI.Dashboard.Update(player, item, index);
+                                GUI.Dashboard.Update(player, item, index);*/
+                                Trigger.ClientEvent(player, "server.item.use.respose", true);
                             }
                             player.SetClothes(6, Customization.CustomPlayerData[UUID].Clothes.Feet.Variation, Customization.CustomPlayerData[UUID].Clothes.Feet.Texture);
                             return;
                         }
-                    case ItemType.Jewelry:
+                    /*case ItemType.Jewelry:
                         {
                             if (item.IsActive)
                             {
@@ -1904,21 +1907,22 @@ namespace SecondLive.Core
                                 }
                             }
                             return;
-                        }
+                        }*/
                     case ItemType.Undershit:
                         {
                             var itemData = (string)item.Data;
                             var underwearID = Convert.ToInt32(itemData.Split('_')[0]);
                             var underwear = Customization.Underwears[gender][underwearID];
                             var texture = Convert.ToInt32(itemData.Split('_')[1]);
-                            if (item.IsActive)
+                            if (item.Cell == -2)
                             {
                                 if (underwear.Top == Customization.CustomPlayerData[UUID].Clothes.Top.Variation)
                                     Customization.CustomPlayerData[UUID].Clothes.Top = new ComponentItem(Customization.EmtptySlots[gender][11], 0);
                                 Customization.CustomPlayerData[UUID].Clothes.Undershit = new ComponentItem(Customization.EmtptySlots[gender][8], 0);
 
-                                nInventory.Items[UUID][index].IsActive = false;
-                                GUI.Dashboard.Update(player, item, index);
+                                /*nInventory.Items[UUID][index].IsActive = false;
+                                GUI.Dashboard.Update(player, item, index);*/
+                                Trigger.ClientEvent(player, "server.item.use.respose", false);
                             }
                             else
                             {
@@ -1926,14 +1930,16 @@ namespace SecondLive.Core
                                 {
                                     if (underwear.Top == -1)
                                     {
-                                        GUI.Notify.Send(player, GUI.Notify.Type.Error, GUI.Notify.Position.BottomCenter, "Эту одежду можно одеть только под низ верхней", 3000);
+                                        Notify.Send(player, "Эту одежду можно одеть только под низ верхней", Notify.Type.Error, Notify.Position.BottomCenter, 3000);
+                                        Trigger.ClientEvent(player, "server.item.use.respose", false);
                                         return;
                                     }
                                     Customization.CustomPlayerData[UUID].Clothes.Top = new ComponentItem(underwear.Top, texture);
 
-                                    nInventory.UnActiveItem(player, item.Type);
+                                    /*nInventory.UnActiveItem(player, item.Type);
                                     nInventory.Items[UUID][index].IsActive = true;
-                                    GUI.Dashboard.Update(player, item, index);
+                                    GUI.Dashboard.Update(player, item, index);*/
+                                    Trigger.ClientEvent(player, "server.item.use.respose", true);
                                 }
                                 else
                                 {
@@ -1943,27 +1949,31 @@ namespace SecondLive.Core
                                         var topType = nowTop.Type;
                                         if (!underwear.UndershirtIDs.ContainsKey(topType))
                                         {
-                                            GUI.Notify.Send(player, GUI.Notify.Type.Error, GUI.Notify.Position.BottomCenter, "Эта одежда несовместима с Вашей верхней одеждой", 3000);
+                                            Notify.Send(player, "Эта одежда несовместима с Вашей верхней одеждой", Notify.Type.Error, Notify.Position.BottomCenter, 3000);
+                                            Trigger.ClientEvent(player, "server.item.use.respose", false);
                                             return;
                                         }
                                         Customization.CustomPlayerData[UUID].Clothes.Undershit = new ComponentItem(underwear.UndershirtIDs[topType], texture);
 
-                                        nInventory.UnActiveItem(player, item.Type);
+                                        /*nInventory.UnActiveItem(player, item.Type);
                                         nInventory.Items[UUID][index].IsActive = true;
-                                        GUI.Dashboard.Update(player, item, index);
+                                        GUI.Dashboard.Update(player, item, index);*/
+                                        Trigger.ClientEvent(player, "server.item.use.respose", true);
                                     }
                                     else
                                     {
                                         if (underwear.Top == -1)
                                         {
-                                            GUI.Notify.Send(player, GUI.Notify.Type.Error, GUI.Notify.Position.BottomCenter, "Эту одежду можно одеть только под низ верхней", 3000);
+                                            Notify.Send(player, "Эту одежду можно одеть только под низ верхней", Notify.Type.Error, Notify.Position.BottomCenter, 3000);
+                                            Trigger.ClientEvent(player, "server.item.use.respose", false);
                                             return;
                                         }
                                         Customization.CustomPlayerData[UUID].Clothes.Top = new ComponentItem(underwear.Top, texture);
 
-                                        nInventory.UnActiveItem(player, item.Type);
+                                        /*nInventory.UnActiveItem(player, item.Type);
                                         nInventory.Items[UUID][index].IsActive = true;
-                                        GUI.Dashboard.Update(player, item, index);
+                                        GUI.Dashboard.Update(player, item, index);*/
+                                        Trigger.ClientEvent(player, "server.item.use.respose", true);
                                     }
                                 }
                             }
@@ -1982,7 +1992,7 @@ namespace SecondLive.Core
                             Customization.ApplyCorrectTorso(player);
                             return;
                         }
-                    case ItemType.BodyArmor:
+                    /*case ItemType.BodyArmor:
                         {
                             if (item.IsActive)
                             {

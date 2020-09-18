@@ -44,9 +44,10 @@ namespace SecondLive
         }*/
 
         [Command("add_item")]
-        public static void CMD_add_item(Player player, int type)
+        public static void CMD_add_item(Player player)
         {
-            nInventory.Add(player, type);
+            //nInventory.Add(player, type);
+            Customization.AddClothes(player, ItemType.Leg, 0, 1, true);
         }
 
         [ServerEvent(Event.PlayerDisconnected)]
@@ -151,6 +152,7 @@ namespace SecondLive
                 if (uuid > 0)
                 {
                     Customization.CreateCharacter(player);
+                    nInventory.Load(player);
                 }
                 Trigger.ClientEvent(player, "client.register.response");
             }
@@ -184,6 +186,7 @@ namespace SecondLive
             {
                 Accounts[player].Characters[num] = uuid;
                 Customization.CreateCharacter(player);
+                nInventory.Load(player);
             }
         }
         [RemoteEvent("client.spawn")]

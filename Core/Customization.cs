@@ -2646,8 +2646,8 @@ namespace SecondLive.Core
                     {
                         case true:
                             AddClothes(player, ItemType.Undershit, 1, 1, true);
-                            /*AddClothes(player, ItemType.Leg, 0, 1, true);
-                            AddClothes(player, ItemType.Feet, 1, 1, true);*/
+                            AddClothes(player, ItemType.Leg, 0, 1, true);
+                            AddClothes(player, ItemType.Feet, 1, 1, true);
 
                             CustomPlayerData[Main.Players[player].UUID].Clothes.Top = new ComponentItem(1, 1);
                             CustomPlayerData[Main.Players[player].UUID].Clothes.Leg = new ComponentItem(0, 1);

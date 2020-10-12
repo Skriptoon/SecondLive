@@ -1496,6 +1496,16 @@ namespace SecondLive.Core
             onUse(player, szItem);
         }
 
+        [RemoteEvent("server.item.act")]
+        public static void ItemAct(Player player, int act, string item)
+        {
+            if(act == 1)
+            {
+                nItem szItem = JsonConvert.DeserializeObject<nItem>(item);
+                onDrop(player, szItem);
+            }
+        }
+
         public static void onUse(Player player, nItem item)
         {
             try
@@ -2600,7 +2610,7 @@ namespace SecondLive.Core
             new Tuple<int, int>(3, 2),
         };
         //
-        public static void onDrop(Player player, nItem item, dynamic data)
+        public static void onDrop(Player player, nItem item)
         {
             try
             {
